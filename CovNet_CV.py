@@ -39,13 +39,13 @@ act_fn = setup.act_fn
 init = setup.init
 dirc = setup.directory
 
-u = np.loadtxt(dirc+'locations1.dat',dtype='float32')
+u = np.loadtxt(dirc+'locations.dat',dtype='float32')
 if len(u.shape)==1:
     D, d = len(u), 1
     u = u.reshape(D,1)
 else:
     D, d = u.shape
-x = np.loadtxt(dirc+'Example1.dat',dtype='float32')
+x = np.loadtxt(dirc+'Example.dat',dtype='float32')
 N = x.shape[0]
 if x.shape[1] != D:
     exit('Data shape mismatch!! Aborting..')
@@ -185,12 +185,12 @@ Ifn.cnet_optim_best(x,u,model,loss_fn,optimizer,split,scheduler,epochs,burn_in,i
 ellapsed = time.time() - current
 del x,u
 
-file = dirc+'True_locations1.dat'
+file = dirc+'True_locations.dat'
 loc = np.loadtxt(file,dtype='float32')
 u = torch.from_numpy(loc[:,:d])
 v = torch.from_numpy(loc[:,d:])
 del loc
-cov_file = dirc+'True_cov1.dat'
+cov_file = dirc+'True_cov.dat'
 err = Ofn.cnet_error_MC(model,u,v,cov_file)
 
 f_err = open(err_file,'a')
