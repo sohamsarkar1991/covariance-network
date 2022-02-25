@@ -12,7 +12,7 @@ For the analysis of fMRI data set in the paper, we used the functions **CovNet_f
 
 In all the cases, the codes produce the errors as a _.txt_ file and the fitted models as a _pickle_ (_.pt_) file. After running the code, the fitted model can be accessed as **model**, or can be read from the _.pt_ file. This can be used with the function _PCA_ in the **CNet_PCA** module to obtain the eigendecomposition of the fitted CovNet.
 
-For the cross-validation (CV) versions of the codes (**x_CV.py**), the code finds the CV-score for a specific choice of hyperparameters, and also fits the same model on the full data.
+For the cross-validation (CV) versions of the codes (**x_CV.py**), the code computes the CV-score for some specific choices of the hyperparameters, finds the best hyperparameter choice by minimizing the CV-score, and fits the best model to the full data.
 
 ## Reference
 Sarkar, S. & Panaretos, V. M. (2021). CovNet: Covariance Networks for Functional Data on Multidimensional Domains. arXiv preprint arXiv:2104.05021.
