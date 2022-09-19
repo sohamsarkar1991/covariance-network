@@ -9,20 +9,27 @@ M is the number of Monte-Carlo samples used to evaluate
 the integrals. model is an element of the class CovNetworks.
 A function to get an estimate of the mean is also included.
 The function mean(model,u) computes the mean field from the
-model and evaluates it at locations speicified by u.
+model and evaluates it at locations u.
 """
 
 import numpy as np
-from scipy.linalg import eigh,eigvalsh
+from scipy.linalg import eigh
 import torch
 import itertools
 
-def positivize(A,B):
-    l_min = eigvalsh(B)[0]
-    if l_min < 0:
-        B = B - (2*l_min)*np.identity(B.shape[0],dtype='float32')
-        A = A - (2*l_min)*np.identity(A.shape[0],dtype='float32')
-    return A,B
+def gen_eigh(A,B,tol=1e-10):
+    """ Generalized eigen-decomposition
+        Particularly useful when B is singular
+    """
+    lam_B, w_B = eigh(B)
+    idx = lam_B>tol
+    lam_B = lam_B[idx]
+    w_B = w_B[:,idx]
+    C = np.matmul(w_B.T,np.matmul(A,w_B))
+    D = np.diag(lam_B)
+    lam, Alpha = eigh(C,D)
+    w = np.matmul(w_B,Alpha)
+    return lam,w
 
 def locations(K,d):
     gr = np.arange(1,K+1)/(K+1)
@@ -35,8 +42,8 @@ def cov_mat(X):
     cov = torch.matmul(X_center.T,X_center)/X_center.size(0)
     return cov
 
-def PCA_weights(model,d,M=50000):
-    u = np.array(np.random.uniform(low=0.,high=1.,size=[M,d]),dtype='float32')
+def PCA_weights(model,d,M=50000,tol=1e-10):
+    u = np.array(np.random.uniform(low=0.,high=1.,size=[M,d]),dtype="float32")
     u = torch.from_numpy(u)
     with torch.no_grad():
         G = model.first_step(u)
@@ -45,20 +52,67 @@ def PCA_weights(model,d,M=50000):
         lam = cov_mat(model.final_layer.weight)
         A = torch.matmul(G,torch.matmul(lam,G.T)).numpy()
         B = G.numpy()
-        A,B = positivize(A,B)
-        eta, W = eigh(A,B)
-    
+        try:
+            eta, W = gen_eigh(A,B,tol)
+        except:
+            print("Error: PCA weights could not be computed!")
+            return 0.
     return eta, W
 
-def PCA(model,u,M=50000):
+def PCA(model,u,M=50000,tol=1e-10):
     d = u.shape[1]
     u_ = torch.from_numpy(np.array(u,dtype='float32'))
-    eta, W = PCA_weights(model,d,M)
+    weights = PCA_weights(model,d,M,tol)
+    if weights==0.:
+        print("Error: PCA could not be computed!")
+        return 0.
+    eta, W = weights
     with torch.no_grad():
         u_ = model.first_step(u_)
         W = torch.from_numpy(W)
         psi = torch.matmul(u_,W).numpy()
-    
+    return eta, psi
+
+def PCA_weights_grid(model,d,res=100,tol=1e-10):
+    """
+    Finds the eigen-decomposition of the CovNet model stored in 'model'
+    Returns the eigen-values and coefficients of the eigen-functions
+    Numerical approximation of the integrals are done by complete enumeration on a grid of resolution 'res'
+    """
+    u = locations(res,d)
+    u = torch.from_numpy(u)
+    M = u.shape[0]
+    with torch.no_grad():
+        G = model.first_step(u)
+        G = torch.matmul(G.T,G)/M
+        del u
+        lam = cov_mat(model.final_layer.weight)
+        A = torch.matmul(G,torch.matmul(lam,G.T)).numpy()
+        B = G.numpy()
+        try:
+            eta, W = gen_eigh(A,B,tol)
+        except:
+            print("Error: PCA weights could not be computed!")
+            return 0.
+    return eta, W
+
+def PCA_grid(model,u,res=100,tol=1e-10):
+    """
+    Finds the eigen-decomposition of the CovNet model stored in 'model'
+    Returns the eigen-values and evaluations of the eigen-functions at locations specified by 'u' 
+    Numerical approximation of the integrals are done by complete enumeration on a grid of resolution 'res'
+    """
+    d = u.shape[1]
+    u_ = torch.from_numpy(np.array(u,dtype='float32'))
+    weights = PCA_weights_grid(model,d,res,tol)
+    if weights==0.:
+        print("Error: PCA could not be computed!")
+        return 0.
+    eta, W = weights
+    with torch.no_grad():
+        u_ = model.first_step(u_)
+        W = torch.from_numpy(W)
+        psi = torch.matmul(u_,W).numpy()
     return eta, psi
 
 def mean(model,u):
