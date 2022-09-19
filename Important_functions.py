@@ -28,9 +28,9 @@ def batch_CV(D,batch_size=10): # points randomly shuffled each time, iterated th
 
 def loss_COV(x,x_hat):
     """
-    |||\widehat{C}_N - \widehat{\widehat{C}}_N|||_2^2
-    \widehat{C}_N - empirical covaraince of X_1,\ldots,X_N
-    \widehat{\widehat{C}}_N - empirical covariance of X^{NN}_1,\ldots,X^{NN}_N
+    |||\widehat{C}_N - \widetilde{C}_N|||_2^2
+    \widehat{C}_N   - empirical covaraince of X_1,\ldots,X_N
+    \widetilde{C}_N - empirical covariance of X^{NN}_1,\ldots,X^{NN}_N
     """
     D = x.shape[1]
     #x_hat = x_hat - torch.mean(x_hat,dim=0,keepdim=True)
