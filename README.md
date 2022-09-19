@@ -1,4 +1,5 @@
-# Covariance Networks (CovNet)
+# Covariance Networks (CovNet) 
+(see **Demo.ipynb** for demonstration)
 
 A `covariance network (CovNet)` model can be built using the module **CovNetworks** by specifying the parameters. Some useful functions for fitting the CovNet model are in **Important_Functions.py**, **Important_Functions_fMRI.py** and **Other_functions.py**.
 
