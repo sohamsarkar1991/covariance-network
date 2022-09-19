@@ -18,4 +18,4 @@ The cross-validation (CV) version **CovNet_CV.py** computes the CV-score for som
 **CovNet_fMRI_CV.py** computes the CV-score for a specific hyperparameter and also fits the same model to the full data. This facilitates parallelization.
 
 ## Reference
-Sarkar, S. & Panaretos, V. M. (2021). CovNet: Covariance Networks for Functional Data on Multidimensional Domains. arXiv preprint arXiv:2104.05021.
+Sarkar, S. & Panaretos, V. M. (2021). CovNet: Covariance Networks for Functional Data on Multidimensional Domains. arXiv preprint arXiv:2104.05021. Accepted for publication in *Journal of the Royal Statistical Society: Series B*.
