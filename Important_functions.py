@@ -11,17 +11,15 @@ import numpy as np
 ##### Using mini batches #####
 
 def batch_CV(D,batch_size=10): # points randomly shuffled each time, iterated through all points
-    Q = []
-    if batch_size == None:
-        return split_CV3(D,1)
-    elif batch_size > D: # batch size must be smaller than D
+    if batch_size==None or batch_size>D:
         batch_size = D
     folds = int(D/batch_size)
+    Q = []
     indices = np.random.choice(D,D,replace=False)
     for fold in range(folds):
         Q_tr = np.sort(indices[fold*batch_size:(fold+1)*batch_size])
-        Q_va = np.setdiff1d(np.arange(D),Q_tr)
-        Q.append((Q_tr,Q_va))
+        Q.append(Q_tr)
+        del Q_tr
     return Q
 
 ##### Loss function #####
