@@ -161,7 +161,7 @@ def cnet_optim_best(x,u,model,loss_fn,optimizer,split,scheduler=None,epochs=1000
     best_state = BestState(checkpoint_file)
     
     for epoch in range(burn_in):
-        for (Q_tr,Q_va) in split(D):
+        for Q_tr in split(D):
             loss = loss_fn(x[:,Q_tr],model(u[Q_tr,:]))
             optimizer.zero_grad()
             loss.backward()
@@ -172,7 +172,7 @@ def cnet_optim_best(x,u,model,loss_fn,optimizer,split,scheduler=None,epochs=1000
     for epoch in range(burn_in,epochs):
         train_losses = []
         val_losses = []
-        for (Q_tr,Q_va) in split(D):
+        for Q_tr in split(D):
             loss = loss_fn(x[:,Q_tr],model(u[Q_tr,:]))
             optimizer.zero_grad()
             loss.backward()
