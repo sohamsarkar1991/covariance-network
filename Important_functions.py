@@ -11,6 +11,19 @@ import numpy as np
 ##### Using mini batches #####
 
 def batch_CV(D,batch_size=10): # points randomly shuffled each time, iterated through all points
+    if batch_size==None or batch_size>=D:
+        yield np.arange(D)
+    else:
+        folds = int(np.ceil(D/batch_size))
+        indices = np.random.choice(D,D,replace=False)
+        fold = 0
+        while fold<folds-1:
+            yield np.sort(indices[fold*batch_size:(fold+1)*batch_size])
+            fold += 1
+        yield np.sort(indices[fold*batch_size:])
+
+
+def batch_CV_old(D,batch_size=10): # points randomly shuffled each time, iterated through all points
     if batch_size==None or batch_size>D:
         batch_size = D
     folds = int(D/batch_size)
