@@ -5,7 +5,6 @@ Parameters used to fit the CovNet models
 import numpy as np
 import torch
 import Important_functions_fMRI as Ifn
-import Other_functions as Ofn
 
 act_fn = torch.nn.Sigmoid()
 init = torch.nn.init.xavier_normal_

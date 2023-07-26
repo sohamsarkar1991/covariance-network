@@ -11,6 +11,19 @@ import numpy as np
 ##### Using mini batches #####
 
 def batch_CV(D,batch_size=10): # points randomly shuffled each time, iterated through all points
+    if batch_size==None or batch_size>=D:
+        yield np.arange(D)
+    else:
+        folds = int(np.ceil(D/batch_size))
+        indices = np.random.choice(D,D,replace=False)
+        fold = 0
+        while fold<folds-1:
+            yield np.sort(indices[fold*batch_size:(fold+1)*batch_size])
+            fold += 1
+        yield np.sort(indices[fold*batch_size:])
+
+
+def batch_CV_old(D,batch_size=10): # points randomly shuffled each time, iterated through all points
     if batch_size==None or batch_size>D:
         batch_size = D
     folds = int(D/batch_size)
@@ -18,20 +31,17 @@ def batch_CV(D,batch_size=10): # points randomly shuffled each time, iterated th
     indices = np.random.choice(D,D,replace=False)
     for fold in range(folds):
         Q_tr = np.sort(indices[fold*batch_size:(fold+1)*batch_size])
-        #Q_va = np.sort(np.random.choice(indices[~Q_tr],batch_size,replace=False))
-        #Q.append((Q_tr,Q_va))
-        #del Q_tr,Q_va
         Q.append(Q_tr)
         del Q_tr
     return Q
 
-##### Loss functions #####
+##### Loss function #####
 
 def loss_COV(x,x_hat):
     """
-    |||\widehat{C}_N - \widehat{\widehat{C}}_N|||_2^2
-    \widehat{C}_N - empirical covaraince of X_1,\ldots,X_N
-    \widehat{\widehat{C}}_N - empirical covariance of X^{NN}_1,\ldots,X^{NN}_N
+    |||\widehat{C}_N - \widetilde{C}_N|||_2^2
+    \widehat{C}_N   - empirical covaraince of X_1,\ldots,X_N
+    \widetilde{C}_N - empirical covariance of X^{NN}_1,\ldots,X^{NN}_N
     """
     D = x.shape[1]
     #x_hat = x_hat - torch.mean(x_hat,dim=0,keepdim=True)
@@ -142,7 +152,7 @@ class BestState:
 
 ##### Optimization routine #####
 
-def cnet_optim_best(x,u,model,loss_fn,optimizer,split,scheduler=None,epochs=1000,burn_in=500,interval=1,checkpoint_file='Checkpoint.pt',loss_file='loss.txt'):
+def cnet_optim_best(x,u,model,loss_fn,optimizer,split,epochs=1000,burn_in=500,interval=1,checkpoint_file='Checkpoint.pt'):
     """
     Optimization routine with on-the-go error computation. Returns the model state that produced the best error.
     INPUTS - x, u - data and locations
@@ -150,7 +160,6 @@ def cnet_optim_best(x,u,model,loss_fn,optimizer,split,scheduler=None,epochs=1000
              loss_fn - loss function (MSE/COV/COV2)
              optimizer - optimizer to be used. An element of class torch.optim
              split - training and validation splitter function
-             scheduler - learning rate scheduler. An element of class torch.optim.lr_scheduler
              epochs - number of epochs
              plot_filename - the filename in which the plots will be saved
              
@@ -158,6 +167,8 @@ def cnet_optim_best(x,u,model,loss_fn,optimizer,split,scheduler=None,epochs=1000
               l_va - validation errors
     """
     D = u.shape[0]
+    l_tr = []
+    l_va = []
     
     best_state = BestState(checkpoint_file)
     
@@ -167,28 +178,27 @@ def cnet_optim_best(x,u,model,loss_fn,optimizer,split,scheduler=None,epochs=1000
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-        if scheduler is not None:
-            scheduler.step()
-    
+        
     for epoch in range(burn_in,epochs):
         train_losses = []
+        val_losses = []
         for Q_tr in split(D):
             loss = loss_fn(x[:,Q_tr],model(u[Q_tr,:]))
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             train_losses.append(loss.item())
-        l_tr = np.mean(train_losses)
+            #with torch.no_grad():
+            #    loss = loss_fn(x[:,Q_va],model(u[Q_va,:]))
+            #    val_losses.append(loss.item())
+        l_tr.append(np.mean(train_losses))
+        #l_va.append(np.mean(val_losses))
         with torch.no_grad():
-            l_va = loss_fn(x,model(u)).item()
-            del loss
-        f = open(loss_file,"a")
-        f.write("{:.10f}\t{:.10f}\n" .format(l_tr,l_va))
-        f.close()
+            loss = loss_fn(x,model(u))
+            l_va.append(loss.item())
         if (epoch-burn_in)%interval == interval-1:
-            best_state(l_va,model,epoch)
-        if scheduler is not None:
-            scheduler.step()
+            best_state(l_va[-1],model,epoch)
+
     best_state.load_checkpoint(model)
     epoch = best_state.epoch
-    return epoch+1
+    return l_tr, l_va, epoch+1

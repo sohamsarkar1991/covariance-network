@@ -5,7 +5,6 @@ Parameters used to fit the CovNet models
 import numpy as np
 import torch
 import Important_functions as Ifn
-import Other_functions as Ofn
 
 act_fn = torch.nn.Sigmoid()
 init = torch.nn.init.xavier_normal_
@@ -13,7 +12,6 @@ init = torch.nn.init.xavier_normal_
 optimizer = torch.optim.Adam
 lr=0.01
 split = lambda D: Ifn.batch_CV(D,batch_size=500)
-scheduler = None
 epochs_shallow = 10000
 burn_in_shallow = 7500
 interval_shallow = 50

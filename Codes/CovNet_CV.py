@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
-import torch
-import numpy as np
+
 import os
 import sys
 import time
 
-sys.path.insert(1, os.path.join("C:\\", "Users", "Soham", "Desktop", "CovNet_runtime_comparison", "CovNet", "Source_codes"))
+import torch
+import numpy as np
+
+sys.path.insert(1, os.path.join("C:\\", "Users", "Soham", "Desktop", "CovNet", "source_codes"))
 
 import CovNetworks as CN
 import Important_functions as Ifn
@@ -109,10 +111,6 @@ for tr_idx, va_idx in kf.split(x):
                 models.append(model)
                 checkpoints.append(checkpoint_file)
     split = setup.split
-    if setup.scheduler is not None:
-        scheduler = setup.scheduler(optimizer)
-    else:
-        scheduler = None
                 
     f_err = open(err_file,'a')
     f_err.write("Fold{}:" .format(k))
@@ -120,7 +118,7 @@ for tr_idx, va_idx in kf.split(x):
     print(time.ctime())
     for i,model in enumerate(models):
         optimizer = setup.optimizer(model.params,lr=setup.lr)
-        Ifn.cnet_optim_best(x_tr,u,model,loss_fn,optimizer,split,scheduler,epochs,burn_in,interval,checkpoints[i])
+        Ifn.cnet_optim_best(x_tr,u,model,loss_fn,optimizer,split,epochs,burn_in,interval,checkpoints[i])
         with torch.no_grad():
             err = loss_fn(x_va,model(u)).item()
             CV_scores[i] += err
@@ -176,12 +174,8 @@ elif method.lower()=='deep':
     interval = setup.interval_deep
 split = setup.split
 optimizer = setup.optimizer(model.params,lr=setup.lr)
-if setup.scheduler is not None:
-    scheduler = setup.scheduler(optimizer)
-else:
-    scheduler = None
     
-Ifn.cnet_optim_best(x,u,model,loss_fn,optimizer,split,scheduler,epochs,burn_in,interval,checkpoint_file)
+Ifn.cnet_optim_best(x,u,model,loss_fn,optimizer,split,epochs,burn_in,interval,checkpoint_file)
 ellapsed = time.time() - current
 del x,u
 

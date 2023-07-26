@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import os
+import sys
+import time
+
 import torch
 import numpy as np
-import os
-import time
+
+sys.path.insert(1, os.path.join("C:\\", "Users", "Soham", "Desktop", "CovNet", "source_codes"))
 
 import CovNetworks as CN
 import Important_functions as Ifn
@@ -71,13 +75,9 @@ for repl in replicates:
         
     optimizer = setup.optimizer(model.params,lr=setup.lr)
     split = setup.split
-    if setup.scheduler is not None:
-        scheduler = setup.scheduler(optimizer)
-    else:
-        scheduler = None
     
     print(time.ctime())
-    l_tr, l_va, epoch = Ifn.cnet_optim_best(x,u,model,loss_fn,optimizer,split,scheduler,epochs,burn_in,interval,checkpoint_file)
+    l_tr, l_va, epoch = Ifn.cnet_optim_best(x,u,model,loss_fn,optimizer,split,epochs,burn_in,interval,checkpoint_file)
     del x,u
     
     file = dirc+'True_locations'+str(repl+1)+'.dat'

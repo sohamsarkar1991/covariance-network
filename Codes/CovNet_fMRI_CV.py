@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
+
 import os
 import sys
+import time
+
 import torch
 import numpy as np
 import nibabel as nib
-import time
+
+sys.path.insert(1, os.path.join("C:\\", "Users", "Soham", "Desktop", "CovNet", "source_codes"))
 
 import CovNetworks as CN
 import Important_functions_fMRI as Ifn
@@ -87,12 +91,8 @@ for tr_idx, va_idx in kf.split(x):
         interval = setup.interval_deep
     split = setup.split
     optimizer = setup.optimizer(model.params,lr=setup.lr)
-    if setup.scheduler is not None:
-        scheduler = setup.scheduler(optimizer)
-    else:
-        scheduler = None
     print(time.ctime())
-    Ifn.cnet_optim_best(x_tr,u,model,loss_fn,optimizer,split,scheduler,epochs,burn_in,interval,checkpoint_file,loss_file)
+    Ifn.cnet_optim_best(x_tr,u,model,loss_fn,optimizer,split,epochs,burn_in,interval,checkpoint_file,loss_file)
     del x_tr
     with torch.no_grad():
         CV_scores.append(loss_fn(x_va,model(u)).item())
@@ -132,11 +132,7 @@ elif method.lower()=='deep':
     interval = setup.interval_deep
 split = setup.split
 optimizer = setup.optimizer(model.params,lr=setup.lr)
-if setup.scheduler is not None:
-    scheduler = setup.scheduler(optimizer)
-else:
-    scheduler = None
 print(time.ctime())
-Ifn.cnet_optim_best(x,u,model,loss_fn,optimizer,split,scheduler,epochs,burn_in,interval,checkpoint_file,loss_file)
+Ifn.cnet_optim_best(x,u,model,loss_fn,optimizer,split,epochs,burn_in,interval,checkpoint_file,loss_file)
 del x,u
 print(time.ctime())

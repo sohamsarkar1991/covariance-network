@@ -3,10 +3,13 @@
 
 import os
 import sys
+import time
+
 import torch
 import numpy as np
 import nibabel as nib
-import time
+
+sys.path.insert(1, os.path.join("C:\\", "Users", "Soham", "Desktop", "CovNet", "source_codes"))
 
 import CovNetworks as CN
 import Important_functions_fMRI as Ifn
@@ -78,13 +81,9 @@ elif method.lower()=='deep':
     interval = setup.interval_deep
 split = setup.split
 optimizer = setup.optimizer(model.params,lr=setup.lr)
-if setup.scheduler is not None:
-    scheduler = setup.scheduler(optimizer)
-else:
-    scheduler = None
 loss_file = loss+'_'+method+'_'+str(depth)+'_'+str(R)+'_losses'+'.txt'
 
 print(time.ctime())
-Ifn.cnet_optim_best(x,u,model,loss_fn,optimizer,split,scheduler,epochs,burn_in,interval,checkpoint_file,loss_file)
+Ifn.cnet_optim_best(x,u,model,loss_fn,optimizer,split,epochs,burn_in,interval,checkpoint_file,loss_file)
 del x,u
 print(time.ctime())
