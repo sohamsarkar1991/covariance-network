@@ -8,4 +8,4 @@ Codes used to produce the results in the paper are in the **`Codes`** folder. So
 
 
 ## Reference
-Sarkar, S. & Panaretos, V. M. (2022). Covariance Networks for Functional Data on Multidimensional Domains. Published in __[*Journal of the Royal Statistical Society: Series B*](https://doi.org/10.1111/rssb.12551)__. __[arXiv preprint](arXiv:2104.05021)__
+Sarkar, S. & Panaretos, V. M. (2022). Covariance Networks for Functional Data on Multidimensional Domains. Published in __[*Journal of the Royal Statistical Society: Series B*](https://doi.org/10.1111/rssb.12551)__. __[arXiv preprint](https://arxiv.org/abs/2104.05021)__
